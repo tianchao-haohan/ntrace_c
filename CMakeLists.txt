@@ -151,7 +151,7 @@ IF (RPMBUILD_FOUND)
 	"%ignore /usr/include"
 	"%ignore /usr/share")
   SET (CPACK_RPM_PACKAGE_DEPENDS
-	"czmq >= 2.2.0, zeromq4 >= 4.0.5, libpcap >= 1.4.0, libini_config, zlib, jansson, libuuid")
+	"czmq >= 2.2.0, zeromq >= 4.0.5, libpcap >= 1.4.0, libini_config, zlib, jansson, libuuid")
   SET (CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_DEPENDS}")
   SET (CPACK_RPM_PRE_INSTALL_SCRIPT_FILE "${CMAKE_SOURCE_DIR}/scripts/pre_install.sh")
   SET (CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_SOURCE_DIR}/scripts/post_install.sh")
