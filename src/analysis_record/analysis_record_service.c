@@ -120,6 +120,58 @@ writeAnalysisRecordOutputFile (void *analysisRecord, u_int len,
 
 /*===========================AnalysisRecord output file dev===========================*/
 
+/*============================AnalysisRecord output net dev===========================*/
+
+typedef struct _analysisRecordOutputNet analysisRecordOutputNet;
+typedef analysisRecordOutputNet *analysisRecordOutputNetPtr;
+
+struct _analysisRecordOutputNet {
+    void *pushSock;
+};
+
+static int
+initAnalysisRecordOutputNet (analysisRecordOutputDevPtr dev) {
+    analysisRecordOutputNetPtr outputNet =
+        (analysisRecordOutputNetPtr) malloc (sizeof (analysisRecordOutputNet));
+    if (outputNet == NULL) {
+        LOGE ("Malloc analysisRecordOutputNet error.\n");
+        return -1;
+    }
+
+    outputNet->pushSock = getAnalysisRecordPushSock ();
+
+    dev->data = outputNet;
+    return 0;
+}
+
+static void
+destroyAnalysisRecordOutputNet (analysisRecordOutputDevPtr dev) {
+    return;
+}
+
+static void
+writeAnalysisRecordOutputNet (void *analysisRecord, u_int len,
+        analysisRecordOutputDevPtr dev) {
+    int ret;
+    analysisRecordOutputNetPtr outputNet;
+    zframe_t *frame;
+
+    outputNet = (analysisRecordOutputNetPtr) dev->data;
+
+    frame = zframe_new (analysisRecord, len);
+    if (frame == NULL) {
+        LOGE ("Create analysis record zframe error.\n");
+        return;
+    }
+
+    ret = zframe_send (&frame, outputNet->pushSock, 0);
+    if (ret < 0)
+        LOGE ("Send analysis record error.\n");
+}
+
+/*============================AnalysisRecord output net dev===========================*/
+
+
 /*==========================AnalysisRecord output splunk dev==========================*/
 
 typedef struct _analysisRecordOutputSplunk analysisRecordOutputSplunk;
@@ -312,6 +364,14 @@ analysisRecordService (void *args) {
         .write = writeAnalysisRecordOutputFile,
     };
 
+    /* Init analysis record output net dev */
+    analysisRecordOutputDev analysisRecordOutputNetDev = {
+        .data = NULL,
+        .init = initAnalysisRecordOutputNet,
+        .destroy = destroyAnalysisRecordOutputNet,
+        .write = writeAnalysisRecordOutputNet,
+    };
+
     /* Init analysis record output splunk dev */
     analysisRecordOutputDev analysisRecordOutputSplunkDev = {
         .data = NULL,
@@ -325,6 +385,13 @@ analysisRecordService (void *args) {
     /* Add analysis record output file dev */
     if (getPropertiesOutputFile ()) {
         ret = analysisRecordOutputDevAdd (&analysisRecordOutputFileDev);
+        if (ret < 0)
+            goto destroyAnalysisRecordOutputDev;
+    }
+
+    /* Add analysis record output net dev */
+    if (getPropertiesAnalysisRecordRecvPort ()) { 
+        ret = analysisRecordOutputDevAdd (&analysisRecordOutputNetDev);
         if (ret < 0)
             goto destroyAnalysisRecordOutputDev;
     }

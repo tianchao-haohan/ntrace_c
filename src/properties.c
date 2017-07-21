@@ -28,6 +28,9 @@ newProperties (void) {
 
     tmp->outputFile = NULL;
 
+    tmp->miningEngineHost = NULL;
+    tmp->analysisRecordRecvPort = 0;
+
     tmp->splunkIndex = NULL;
     tmp->splunkSource = NULL;
     tmp->splunkSourcetype = NULL;
@@ -55,6 +58,9 @@ freeProperties (propertiesPtr instance) {
 
     free (instance->outputFile);
     instance->outputFile = NULL;
+
+    free (instance->miningEngineHost);
+    instance->miningEngineHost = NULL;
 
     free (instance->splunkIndex);
     instance->splunkIndex = NULL;
@@ -283,6 +289,30 @@ loadPropertiesFromConfigFile (char *configFile) {
     else
         tmp->autoAddService = False;
 
+    /* Get mining engine host */
+    ret = get_config_item ("MiningEngine", "miningEngineHost", iniConfig, &item);
+    if (ret || item == NULL) {
+        fprintf (stderr, "Get_config_item \"miningEngineHost\" error.\n");
+        goto freeProperties;
+    }
+    tmp->miningEngineHost = strdup (get_const_string_config_value (item, &error));
+    if (tmp->miningEngineHost == NULL) {
+        fprintf (stderr, "Get \"miningEngineHost\" error.\n");
+        goto freeProperties;
+    }
+    
+    /* Get analysis record receive port */
+    ret = get_config_item ("MiningEngine", "analysisRecordRecvPort", iniConfig, &item);
+    if (ret || item == NULL) {
+        fprintf (stderr, "Get_config_item \"analysisRecordRecvPort\" error.\n");
+        goto freeProperties;
+    }
+    tmp->analysisRecordRecvPort = get_int_config_value (item, 1, 0, &error);
+    if (error) {
+        fprintf (stderr, "Get \"analysisRecordRecvPort\" error.\n");
+        goto freeProperties;
+    }
+
     /* Get log logDir */
     ret = get_config_item ("log", "logDir", iniConfig, &item);
     if (ret || item == NULL) {
@@ -412,6 +442,27 @@ getPropertiesAutoAddService (void) {
 }
 
 char *
+getPropertiesMiningEngineHost (void) {
+    return propertiesInstance->miningEngineHost;
+}
+
+void
+updatePropertiesMiningEngineHost (char *ip) {
+    free (propertiesInstance->miningEngineHost);
+    propertiesInstance->miningEngineHost = strdup (ip);
+}
+
+u_short
+getPropertiesAnalysisRecordRecvPort (void) {
+    return propertiesInstance->analysisRecordRecvPort;
+}
+
+void
+updatePropertiesAnalysisRecordRecvPort (u_short port) {
+    propertiesInstance->analysisRecordRecvPort = port;
+}
+
+char *
 getPropertiesLogDir (void) {
     return propertiesInstance->logDir;
 }
@@ -443,6 +494,8 @@ displayPropertiesDetail (void) {
     LOGI ("    splunkAuthToken: %s\n", getPropertiesSplunkAuthToken ());
     LOGI ("    splunkUrl: %s\n", getPropertiesSplunkUrl ());
     LOGI ("    autoAddService: %s\n", getPropertiesAutoAddService () ? "True" : "False");
+    LOGI ("    miningEngineHost: %s\n", getPropertiesMiningEngineHost ());
+    LOGI ("    analysisRecordRecvPort: %u\n", getPropertiesAnalysisRecordRecvPort ());
     LOGI ("    logDir: %s\n", getPropertiesLogDir ());
     LOGI ("    logFileName: %s\n", getPropertiesLogFileName ());
     LOGI ("    logLevel: ");

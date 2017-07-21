@@ -34,6 +34,8 @@ struct _zmqHub {
 
     void *analysisRecordRecvSock;       /**< Analysis record recv sock */
 
+    void *analysisRecordPushSock;       /**< Analysis record push sock */
+
     void *topologyEntrySendSock;        /**< Topology entry send sock */
 
     void *appServiceSendSock;           /**< Application service send sock */
@@ -71,6 +73,8 @@ void *
 getProtoDetectionStatusRecvSock (void);
 void *
 getAnalysisRecordRecvSock (void);
+void *
+getAnalysisRecordPushSock (void);
 void *
 getTopologyEntrySendSock (void);
 void *

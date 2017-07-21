@@ -26,6 +26,10 @@ struct _properties {
     char *splunkAuthToken;              /**< Splunk auth token for http event collector */
     char *splunkUrl;                    /**< Splunk url for http event collector */
 
+    char *miningEngineHost;             /**< Mining engine host ip */
+    u_short analysisRecordRecvPort;     /**< Analysis record receive port of
+                                             mining engine */
+
     boolean autoAddService;             /**< Auto add detected service to sniff */
 
     char *logDir;                       /**< Log dir */
@@ -62,6 +66,14 @@ char *
 getPropertiesSplunkUrl (void);
 boolean
 getPropertiesAutoAddService (void);
+char *
+getPropertiesMiningEngineHost (void);
+void
+updatePropertiesMiningEngineHost (char *ip);
+u_short
+getPropertiesAnalysisRecordRecvPort (void);
+void
+updatePropertiesAnalysisRecordRecvPort (u_short port);
 char *
 getPropertiesLogDir (void);
 char *
