@@ -114,6 +114,8 @@ onReqHeaderField (http_parser *parser, const char* from, size_t length) {
         currHeaderType = HTTP_HEADER_ACCEPT_ENCODING;
     else if (httpHeaderEqualWithLen (HTTP_HEADER_X_FORWARDED_FOR_STRING, from, length))
         currHeaderType = HTTP_HEADER_X_FORWARDED_FOR;
+    else if (httpHeaderEqualWithLen (HTTP_HEADER_X_REAL_IP_STRING, from, length))
+        currHeaderType = HTTP_HEADER_X_REAL_IP;
     else if (httpHeaderEqualWithLen (HTTP_HEADER_CONNECTION_STRING, from, length))
         currHeaderType = HTTP_HEADER_CONNECTION;
 
@@ -169,6 +171,12 @@ onReqHeaderValue (http_parser *parser, const char* from, size_t length) {
             currNode->xForwardedFor = strndup (from, length);
             if (currNode->xForwardedFor == NULL)
                 LOGE ("Get X-Forwarded-For field error.\n");
+            break;
+
+        case HTTP_HEADER_X_REAL_IP:
+            currNode->xRealIP = strndup (from, length);
+            if (currNode->xRealIP == NULL)
+                LOGE ("Get X-Real-IP field error.\n");
             break;
 
         case HTTP_HEADER_CONNECTION:
@@ -390,6 +398,7 @@ newHttpSessionDetailNode (void) {
     hsdn->acceptLanguage = NULL;
     hsdn->acceptEncoding = NULL;
     hsdn->xForwardedFor = NULL;
+    hsdn->xRealIP = NULL;
     hsdn->reqConnection = NULL;
     hsdn->respVer = NULL;
     hsdn->contentType = NULL;
@@ -431,6 +440,8 @@ freeHttpSessionDetailNode (httpSessionDetailNodePtr hsdn) {
     hsdn->acceptEncoding = NULL;
     free (hsdn->xForwardedFor);
     hsdn->xForwardedFor = NULL;
+    free (hsdn->xRealIP);
+    hsdn->xRealIP = NULL;
     free (hsdn->reqConnection);
     hsdn->reqConnection = NULL;
     free (hsdn->respVer);
@@ -523,6 +534,7 @@ newHttpSessionBreakdown (void) {
     hsbd->acceptLanguage = NULL;
     hsbd->acceptEncoding = NULL;
     hsbd->xForwardedFor = NULL;
+    hsbd->xRealIP = NULL;
     hsbd->reqConnection = NULL;
     hsbd->respVer = NULL;
     hsbd->contentType = NULL;
@@ -568,6 +580,8 @@ freeHttpSessionBreakdown (void *sbd) {
     hsbd->acceptEncoding = NULL;
     free (hsbd->xForwardedFor);
     hsbd->xForwardedFor = NULL;
+    free (hsbd->xRealIP);
+    hsbd->xRealIP = NULL;
     free (hsbd->reqConnection);
     hsbd->reqConnection = NULL;
     free (hsbd->respVer);
@@ -692,6 +706,15 @@ generateHttpSessionBreakdown (void *sd, void *sbd) {
         hsbd->xForwardedFor = strdup (hsdn->xForwardedFor);
         if (hsbd->xForwardedFor == NULL) {
             LOGE ("Strdup httpSessionBreakdown xForwardedFor error: %s.\n", strerror (errno));
+            freeHttpSessionDetailNode (hsdn);
+            return -1;
+        }
+    }
+
+    if (hsdn->xRealIP) {
+        hsbd->xRealIP = strdup (hsdn->xRealIP);
+        if (hsbd->xRealIP == NULL) {
+            LOGE ("Strdup httpSessionBreakdown xRealIP error: %s.\n", strerror (errno));
             freeHttpSessionDetailNode (hsdn);
             return -1;
         }
@@ -886,6 +909,11 @@ httpSessionBreakdown2Json (json_t *root, void *sd, void *sbd) {
         if (hsbd->xForwardedFor)
             json_object_set_new (root, HTTP_SBKD_X_FORWARDED_FOR,
                                  json_string (hsbd->xForwardedFor));
+
+        /* Http request X-Real-IP */
+        if (hsbd->xRealIP)
+            json_object_set_new (root, HTTP_SBKD_X_REAL_IP,
+                                 json_string (hsbd->xRealIP));
 
         /* Http request connection type */
         if (hsbd->reqConnection)

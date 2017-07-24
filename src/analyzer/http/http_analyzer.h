@@ -16,6 +16,7 @@ typedef enum {
     HTTP_HEADER_ACCEPT_LANGUAGE,
     HTTP_HEADER_ACCEPT_ENCODING,
     HTTP_HEADER_X_FORWARDED_FOR,
+    HTTP_HEADER_X_REAL_IP,
     HTTP_HEADER_CONTENT_TYPE,
     HTTP_HEADER_CONTENT_DISPOSITION,
     HTTP_HEADER_TRANSFER_ENCODING,
@@ -30,6 +31,7 @@ typedef enum {
 #define HTTP_HEADER_ACCEPT_LANGUAGE_STRING "Accept-Language"
 #define HTTP_HEADER_ACCEPT_ENCODING_STRING "Accept-Encoding"
 #define HTTP_HEADER_X_FORWARDED_FOR_STRING "X-Forwarded-For"
+#define HTTP_HEADER_X_REAL_IP_STRING "X-Real-IP"
 #define HTTP_HEADER_CONTENT_TYPE_STRING "Content-Type"
 #define HTTP_HEADER_CONTENT_DISPOSITION_STRING "Content-Disposition"
 #define HTTP_HEADER_TRANSFER_ENCODING_STRING "Transfer-Encoding"
@@ -65,6 +67,7 @@ struct _httpSessionDetailNode {
     char *acceptLanguage;               /**< Http request accept language */
     char *acceptEncoding;               /**< Http request accept encoding */
     char *xForwardedFor;                /**< Http request x forwarded for */
+    char *xRealIP;                      /**< Http request x real IP */
     char *reqConnection;                /**< Http request connection */
     char *respVer;                      /**< Http protocol response version */
     char *contentType;                  /**< Http response content type */
@@ -119,6 +122,7 @@ struct _httpSessionBreakdown {
     char *acceptLanguage;               /**< Http request accept language */
     char *acceptEncoding;               /**< Http request accept encoding */
     char *xForwardedFor;                /**< Http request x forwarded for */
+    char *xRealIP;                      /**< Http request x real IP */
     char *reqConnection;                /**< Http request connection */
     char *respVer;                      /**< Http protocol response version */
     char *contentType;                  /**< Http response content type */
@@ -149,6 +153,7 @@ struct _httpSessionBreakdown {
 #define HTTP_SBKD_ACCEPT_LANGUAGE "http_accept_language"
 #define HTTP_SBKD_ACCEPT_ENCODING "http_accept_encoding"
 #define HTTP_SBKD_X_FORWARDED_FOR "http_x_forwarded_for"
+#define HTTP_SBKD_X_REAL_IP "http_x_real_ip"
 #define HTTP_SBKD_REQUEST_CONNECTION "http_request_connection"
 #define HTTP_SBKD_RESPONSE_VERSION "http_response_version"
 #define HTTP_SBKD_CONTENT_TYPE "http_content_type"
