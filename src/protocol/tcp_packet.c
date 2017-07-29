@@ -791,7 +791,8 @@ generateTcpBreakdown (tcpStreamPtr stream, timeValPtr tm) {
             tbd.retries = stream->retries;
             tbd.retriesLatency = stream->retriesTime - stream->synTime;
             tbd.dupSynAcks = stream->dupSynAcks;
-            tbd.connLatency = stream->estbTime - stream->retriesTime;
+            //tbd.connLatency = stream->estbTime - stream->retriesTime;
+            tbd.connLatency = stream->estbTime - stream->synTime;
             break;
 
         default:
